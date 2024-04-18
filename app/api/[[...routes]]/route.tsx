@@ -15,7 +15,7 @@ const app = new Frog({
   assetsPath: "/",
   basePath: "/api",
   hub: neynarHub({ apiKey: `${process.env.NEYNAR_API_KEY}` }),
-  browserLocation: ADD_URL,
+  //browserLocation: ADD_URL,
 }).use(
   neynar({
     apiKey: `${process.env.NEYNAR_API_KEY}`,
