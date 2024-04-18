@@ -84,7 +84,7 @@ app.post('/rank-action', async (c) => {
 
       const data = await response.json();
 
-      let message = `Count:${cast.cast.author.username}`;
+      let message = `Rank:${data.result.rank} & ${data.result.fid}`;
       return c.json({ message });
     }
   } catch (e) {
