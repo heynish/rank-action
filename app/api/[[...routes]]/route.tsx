@@ -25,19 +25,6 @@ export const app = new Frog({
   })
 );
 
-// Cast action GET handler
-app.get("/rank-action", async (c) => {
-  return c.json({
-    name: "Check Rank",
-    icon: "thumbsup",
-    description: "Give casts 'upthumbs' and see them on a leaderboard.",
-    aboutUrl: "https://github.com/horsefacts/upthumbs",
-    action: {
-      type: "post",
-    },
-  });
-});
-
 app.frame('/', (c) => {
   return c.res({
     image: '/1.png',
@@ -50,6 +37,19 @@ app.frame('/', (c) => {
     ],
   })
 })
+
+// Cast action GET handler
+app.get("/rank-action", async (c) => {
+  return c.json({
+    name: "Check Rank",
+    icon: "thumbsup",
+    description: "Give casts 'upthumbs' and see them on a leaderboard.",
+    aboutUrl: "https://github.com/horsefacts/upthumbs",
+    action: {
+      type: "post",
+    },
+  });
+});
 
 app.post('/rank-action', async (c) => {
   try {
@@ -68,10 +68,7 @@ app.post('/rank-action', async (c) => {
           author: { fid, username },
         },
       } = cast;
-
-
       let message = `Count:${cast.cast.author.username}`;
-
       return c.json({ message });
     }
   } catch (e) {
