@@ -41,7 +41,7 @@ app.frame('/', (c) => {
 // Cast action GET handler
 app.get("/rank-action", async (c) => {
   return c.json({
-    name: "Check Rank",
+    name: "Check Global Rank",
     icon: "thumbsup",
     description: "Give casts 'upthumbs' and see them on a leaderboard.",
     aboutUrl: "https://github.com/horsefacts/upthumbs",
@@ -83,8 +83,9 @@ app.post('/rank-action', async (c) => {
       }
 
       const data = await response.json();
+      console.log('data', data);
 
-      let message = `Rank:${data.result.rank} & ${data.result.fid}`;
+      let message = `Rank:${data.result[0].rank} & ${data.result[0].fid}`;
       return c.json({ message });
     }
   } catch (e) {
