@@ -8,7 +8,7 @@ import { handle } from 'frog/next'
 import { serveStatic } from 'frog/serve-static';
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
-const neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
+const neynarClient = new NeynarAPIClient(`${process.env.NEYNAR_API_KEY}`);
 
 const app = new Frog({
   assetsPath: "/",
@@ -58,15 +58,15 @@ app.post('/rank-action', async (c) => {
       body.trustedData.messageBytes
     );
 
-    const { user } = await neynarClient.fetchBulkUsers([
+    const { users } = await neynarClient.fetchBulkUsers([
       Number(result.action.cast.author.fid),
     ]);
 
-    if (!user) {
+    if (!users) {
       return c.json({ message: "Error. Try Again." }, 500);
     }
 
-    let message = `Count:${user[0].follower_count}`;
+    let message = `Count:${users[0].follower_count}`;
 
     return c.json({ message });
   } catch (e) {
