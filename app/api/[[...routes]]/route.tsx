@@ -30,7 +30,7 @@ app.frame('/', (c) => {
         name="Get Global Rank"
         icon="log"
       >
-        Add Action
+        Add Global Rank
       </Button.AddCastAction>,
     ],
   })
