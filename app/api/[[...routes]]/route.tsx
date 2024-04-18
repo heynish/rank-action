@@ -1,10 +1,8 @@
-/** @jsxImportSource frog/jsx */
-
 import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
 import { neynar as neynarHub } from 'frog/hubs'
 import { neynar } from "frog/middlewares";
-import { handle } from 'frog/vercel'
+import { handle } from 'frog/next'
 import { serveStatic } from 'frog/serve-static';
 import { CastParamType, NeynarAPIClient } from "@neynar/nodejs-sdk";
 
@@ -13,7 +11,7 @@ const neynarClient = new NeynarAPIClient(`${process.env.NEYNAR_API_KEY}`);
 const ADD_URL =
   "https://warpcast.com/~/add-cast-action?url=https://rank-action.vercel.app/api/rank-action";
 
-export const app = new Frog({
+const app = new Frog({
   assetsPath: "/",
   basePath: "/api",
   hub: neynarHub({ apiKey: `${process.env.NEYNAR_API_KEY}` }),
