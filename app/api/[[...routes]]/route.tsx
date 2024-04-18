@@ -26,7 +26,7 @@ app.frame('/', (c) => {
     image: '/1.png',
     intents: [
       <Button.AddCastAction
-        action="/rank-action"
+        action="/install-action"
         name="Get Global Rank"
         icon="log"
       >
@@ -34,6 +34,22 @@ app.frame('/', (c) => {
       </Button.AddCastAction>,
     ],
   })
+})
+
+
+app.get('/install-action', async (c) => {
+  const actionObject = {
+    "name": "Check Global Rank",
+    "icon": "lightbulb",
+    "description": "Get Global Rank.",
+    "aboutUrl": "https://rank-action.vercel.app/api/rank-action",
+    "action": {
+      "type": "post"
+    }
+  };
+
+  // Use c.json() to return the actionObject as a JSON response
+  return c.json(actionObject)
 })
 
 app.castAction("/rank-action", neynarMiddleware, async (c) => {
