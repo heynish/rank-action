@@ -21,13 +21,16 @@ const neynarMiddleware = neynar({
   features: ['interactor', 'cast'],
 })
 
+const ADD_URL =
+  "https://warpcast.com/~/add-cast-action?actionType=post&name=GlobalRank&icon=person&postUrl=https://rank-action.vercel.app/api/rank-action";
+
+
 app.frame('/', (c) => {
   return c.res({
-    action: "/install-action",
     image: '/1.png',
     intents: [
       <Button.Link
-        href="https://warpcast.com/~/add-cast-action?postUrl=https://rank-action.vercel.app/api/install-action"
+        href={ADD_URL}
       >
         Add Global Rank
       </Button.Link>,
@@ -35,21 +38,6 @@ app.frame('/', (c) => {
   })
 })
 
-
-app.get('/install-action', async (c) => {
-  const actionObject = {
-    "name": "Check Global Rank",
-    "icon": "lightbulb",
-    "description": "Get Global Rank.",
-    "aboutUrl": "https://rank-action.vercel.app/api/rank-action",
-    "action": {
-      "type": "post"
-    }
-  };
-
-  // Use c.json() to return the actionObject as a JSON response
-  return c.json(actionObject)
-})
 
 app.castAction("/rank-action", neynarMiddleware, async (c) => {
 
