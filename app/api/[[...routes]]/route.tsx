@@ -1,3 +1,5 @@
+/** @jsxImportSource frog/jsx */
+
 import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
 import { neynar as neynarHub } from 'frog/hubs'
@@ -34,7 +36,7 @@ app.frame('/', (c) => {
       </Button.Link>,
     ],
   })
-})
+});
 
 // Cast action GET handler
 app.get("/rank-action", async (c) => {
@@ -66,64 +68,29 @@ app.post('/rank-action', async (c) => {
           author: { fid, username },
         },
       } = cast;
+
+      const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([username])
+      })
+
+      if (!response.ok) {
+        return c.json({ message: 'Failed to call Openrank API' }, 400);
+      }
+
+      const data = await response.json();
+
       let message = `Count:${cast.cast.author.username}`;
       return c.json({ message });
     }
   } catch (e) {
     return c.json({ message: "Error. Try Again." }, 500);
   }
-  /*  const username = c.req.param('username');
- 
-   const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
-     method: 'POST',
-     headers: {
-       'Accept': 'application/json',
-       'Content-Type': 'application/json'
-     },
-     body: JSON.stringify([username])
-   })
- 
-   if (!response.ok) {
-     return c.json({ message: 'Failed to call Openrank API', metadata: actionMetadata }, 400);
-   }
- 
-   const data = await response.json();
- 
-   // Combine the API response data with your metadata before returning
-   return c.json({
-     message: data,
-     metadata: actionMetadata // Add the metadata to the response
-   }); */
 });
-
-
-/* app.castAction("/rank-action", neynarMiddleware, async (c) => {
-
-  if (c.verified) {
-    //const fid = c.actionData.fid;
-    const username = c.var.interactor?.displayName;
-
-    const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify([username])
-    })
-
-    if (!response.ok) {
-      return c.res({ message: 'Failed to call Openrank API' });
-    }
-
-    const data = await response.json()
-    console.log('data', data);
-
-    return c.res({ message: data });
-  } else {
-    return c.res({ message: "Unauthorized" });
-  }
-}); */
 
 devtools(app, { serveStatic })
 
