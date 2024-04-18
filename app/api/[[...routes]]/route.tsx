@@ -23,15 +23,14 @@ const neynarMiddleware = neynar({
 
 app.frame('/', (c) => {
   return c.res({
+    action: "/install-action",
     image: '/1.png',
     intents: [
-      <Button.AddCastAction
-        action="/install-action"
-        name="Get Global Rank"
-        icon="log"
+      <Button.Link
+        href="https://warpcast.com/~/add-cast-action?postUrl=https://rank-action.vercel.app/api/install-action"
       >
         Add Global Rank
-      </Button.AddCastAction>,
+      </Button.Link>,
     ],
   })
 })
