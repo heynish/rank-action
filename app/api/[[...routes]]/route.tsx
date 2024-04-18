@@ -4,7 +4,7 @@ import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
 import { neynar as neynarHub } from 'frog/hubs'
 import { neynar } from "frog/middlewares";
-import { handle } from 'frog/next'
+import { handle } from 'frog/vercel'
 import { serveStatic } from 'frog/serve-static';
 import { CastParamType, NeynarAPIClient } from "@neynar/nodejs-sdk";
 
