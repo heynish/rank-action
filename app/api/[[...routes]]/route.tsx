@@ -85,7 +85,7 @@ app.post('/rank-action', async (c) => {
       const data = await response.json();
       console.log('data', data);
 
-      let message = `Global Rank:${data.result[0].rank}`;
+      let message = `🚩: ${data.result[0].rank} | %: ${data.result[0].percentile}`;
       return c.json({ message });
     }
   } catch (e) {
