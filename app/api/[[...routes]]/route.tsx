@@ -5,7 +5,10 @@ import { devtools } from 'frog/dev'
 import { neynar as hub_neynar } from 'frog/hubs'
 import { neynar } from "frog/middlewares";
 import { handle } from 'frog/next'
-import { serveStatic } from 'frog/serve-static'
+import { serveStatic } from 'frog/serve-static';
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+
+const neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
 
 const app = new Frog({
   assetsPath: "/",
@@ -22,7 +25,7 @@ const neynarMiddleware = neynar({
 })
 
 const ADD_URL =
-  "https://warpcast.com/~/add-cast-action?actionType=post&name=GlobalRank&icon=person&postUrl=https://rank-action.vercel.app/api/rank-action";
+  "https://warpcast.com/~/add-cast-action?url=https://rank-action.vercel.app/api/rank-action";
 
 
 app.frame('/', (c) => {
@@ -38,8 +41,63 @@ app.frame('/', (c) => {
   })
 })
 
+const actionMetadata = {
+  name: "Rank Action",
+  icon: "lightbulb",
+  description: "Retrieve global ranking for a user.",
+  aboutUrl: "https://yourdomain.com/about-rank-action",
+  action: {
+    type: 'post'
+  }
+};
 
-app.castAction("/rank-action", neynarMiddleware, async (c) => {
+app.post('/rank-action', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await neynarClient.validateFrameAction(
+      body.trustedData.messageBytes
+    );
+
+    const { user } = await neynarClient.fetchBulkUsers([
+      Number(result.action.cast.author.fid),
+    ]);
+
+    if (!user) {
+      return c.json({ message: "Error. Try Again." }, 500);
+    }
+
+    let message = `Count:${user[0].follower_count}`;
+
+    return c.json({ message });
+  } catch (e) {
+    return c.json({ message: "Error. Try Again." }, 500);
+  }
+  /*  const username = c.req.param('username');
+ 
+   const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
+     method: 'POST',
+     headers: {
+       'Accept': 'application/json',
+       'Content-Type': 'application/json'
+     },
+     body: JSON.stringify([username])
+   })
+ 
+   if (!response.ok) {
+     return c.json({ message: 'Failed to call Openrank API', metadata: actionMetadata }, 400);
+   }
+ 
+   const data = await response.json();
+ 
+   // Combine the API response data with your metadata before returning
+   return c.json({
+     message: data,
+     metadata: actionMetadata // Add the metadata to the response
+   }); */
+});
+
+
+/* app.castAction("/rank-action", neynarMiddleware, async (c) => {
 
   if (c.verified) {
     //const fid = c.actionData.fid;
@@ -65,7 +123,7 @@ app.castAction("/rank-action", neynarMiddleware, async (c) => {
   } else {
     return c.res({ message: "Unauthorized" });
   }
-});
+}); */
 
 devtools(app, { serveStatic })
 
