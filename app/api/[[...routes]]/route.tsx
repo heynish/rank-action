@@ -2,31 +2,41 @@
 
 import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
-import { neynar as hub_neynar } from 'frog/hubs'
+import { neynar as neynarHub } from 'frog/hubs'
 import { neynar } from "frog/middlewares";
 import { handle } from 'frog/next'
 import { serveStatic } from 'frog/serve-static';
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { CastParamType, NeynarAPIClient } from "@neynar/nodejs-sdk";
 
 const neynarClient = new NeynarAPIClient(`${process.env.NEYNAR_API_KEY}`);
-
-const app = new Frog({
-  assetsPath: "/",
-  basePath: "/api",
-  hub: hub_neynar({ apiKey: `${process.env.NEYNAR_API_KEY}` }),
-});
-
-// Uncomment to use Edge Runtime
-// export const runtime = 'edge'
-
-const neynarMiddleware = neynar({
-  apiKey: `${process.env.NEYNAR_API_KEY}`,
-  features: ['interactor', 'cast'],
-})
 
 const ADD_URL =
   "https://warpcast.com/~/add-cast-action?url=https://rank-action.vercel.app/api/rank-action";
 
+export const app = new Frog({
+  assetsPath: "/",
+  basePath: "/api",
+  hub: neynarHub({ apiKey: `${process.env.NEYNAR_API_KEY}` }),
+  browserLocation: ADD_URL,
+}).use(
+  neynar({
+    apiKey: `${process.env.NEYNAR_API_KEY}`,
+    features: ["interactor", "cast"],
+  })
+);
+
+// Cast action GET handler
+app.hono.get("/rank-action", async (c) => {
+  return c.json({
+    name: "Check Rank",
+    icon: "thumbsup",
+    description: "Give casts 'upthumbs' and see them on a leaderboard.",
+    aboutUrl: "https://github.com/horsefacts/upthumbs",
+    action: {
+      type: "post",
+    },
+  });
+});
 
 app.frame('/', (c) => {
   return c.res({
@@ -41,34 +51,29 @@ app.frame('/', (c) => {
   })
 })
 
-const actionMetadata = {
-  name: "Rank Action",
-  icon: "lightbulb",
-  description: "Retrieve global ranking for a user.",
-  aboutUrl: "https://yourdomain.com/about-rank-action",
-  action: {
-    type: 'post'
-  }
-};
-
 app.post('/rank-action', async (c) => {
   try {
-    const body = await c.req.json();
-    const result = await neynarClient.validateFrameAction(
-      body.trustedData.messageBytes
-    );
+    const {
+      trustedData: { messageBytes },
+    } = await c.req.json();
 
-    const { users } = await neynarClient.fetchBulkUsers([
-      Number(result.action.cast.author.fid),
-    ]);
+    const result = await neynarClient.validateFrameAction(messageBytes);
+    if (result.valid) {
+      const cast = await neynarClient.lookUpCastByHashOrWarpcastUrl(
+        result.action.cast.hash,
+        CastParamType.Hash
+      );
+      const {
+        cast: {
+          author: { fid, username },
+        },
+      } = cast;
 
-    if (!users) {
-      return c.json({ message: "Error. Try Again." }, 500);
+
+      let message = `Count:${cast.cast.author.username}`;
+
+      return c.json({ message });
     }
-
-    let message = `Count:${users[0].follower_count}`;
-
-    return c.json({ message });
   } catch (e) {
     return c.json({ message: "Error. Try Again." }, 500);
   }
