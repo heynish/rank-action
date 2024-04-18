@@ -17,7 +17,7 @@ export const app = new Frog({
   assetsPath: "/",
   basePath: "/api",
   hub: neynarHub({ apiKey: `${process.env.NEYNAR_API_KEY}` }),
-  //browserLocation: ADD_URL,
+  browserLocation: ADD_URL,
 }).use(
   neynar({
     apiKey: `${process.env.NEYNAR_API_KEY}`,
@@ -26,7 +26,7 @@ export const app = new Frog({
 );
 
 // Cast action GET handler
-app.hono.get("/rank-action", async (c) => {
+app.get("/rank-action", async (c) => {
   return c.json({
     name: "Check Rank",
     icon: "thumbsup",
