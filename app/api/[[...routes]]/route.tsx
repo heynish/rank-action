@@ -41,10 +41,10 @@ app.frame('/', (c) => {
 // Cast action GET handler
 app.get("/rank-action", async (c) => {
   return c.json({
-    name: "Check Global Rank",
-    icon: "thumbsup",
-    description: "Give casts 'upthumbs' and see them on a leaderboard.",
-    aboutUrl: "https://github.com/horsefacts/upthumbs",
+    name: "Global Profile Rank",
+    icon: "milestone",
+    description: "Global rank of any farcaster account based on Karma3Labs OpenRank APIs for Global Profile Ranking.",
+    aboutUrl: "https://docs.karma3labs.com/farcaster/global-profile-ranking-api",
     action: {
       type: "post",
     },
@@ -85,7 +85,7 @@ app.post('/rank-action', async (c) => {
       const data = await response.json();
       console.log('data', data);
 
-      let message = `Rank:${data.result[0].rank} & ${data.result[0].fid}`;
+      let message = `Global Rank:${data.result[0].rank}`;
       return c.json({ message });
     }
   } catch (e) {
