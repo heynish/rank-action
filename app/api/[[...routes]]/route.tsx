@@ -7,6 +7,8 @@ import { neynar } from "frog/middlewares";
 import { handle } from 'frog/next'
 import { serveStatic } from 'frog/serve-static';
 import { CastParamType, NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { addUser, incrementUserTotalLoads } from '../../core/addUser'
+
 
 const neynarClient = new NeynarAPIClient(`${process.env.NEYNAR_API_KEY}`);
 
@@ -25,14 +27,84 @@ const app = new Frog({
   })
 );
 
-app.frame('/', (c) => {
+app.frame('/', async (c) => {
+  const { buttonValue, verified, frameData } = c;
+  if (!verified) {
+    console.log("Is verified");
+    return c.res({
+      image: '/notverified.png',
+      intents: [
+        <Button value="First">My Rank</Button>,
+        <Button.Link
+          href={ADD_URL}
+        >
+          Add Action
+        </Button.Link>,
+      ],
+    });
+  }
+  if (buttonValue === "First") {
+    const username = c.var.interactor?.username;
+    const address = c.var.interactor?.verifiedAddresses.ethAddresses[0];
+    const following = c.var.interactor?.viewerContext?.following;
+    const userData = {
+      username: username || "",
+      fid: frameData?.fid || 0,
+      address: address || "",
+      loads: 1,
+      following: following || false,
+      recasted: false,
+    };
+    const totalLoads = await incrementUserTotalLoads(frameData?.fid || 0);
+    if (!totalLoads) addUser(userData);
+
+    const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify([username])
+    })
+
+    if (!response.ok) {
+      return c.res({
+        image: '/tryagain.png',
+        intents: [
+          <Button value="First">My Rank</Button>,
+          <Button.Link
+            href={ADD_URL}
+          >
+            Add Action
+          </Button.Link>,
+        ],
+      })
+    }
+
+    const data = await response.json();
+    console.log('data', data);
+    const url = `${process.env.NEXT_PUBLIC_HOST}/api/rank?rank=${data.result[0].rank}&percentile=${data.result[0].percentile}`
+
+    return c.res({
+      action: '/',
+      image: url,
+      intents: [
+        <Button.Link
+          href={ADD_URL}
+        >
+          Add Action
+        </Button.Link>,
+      ],
+    })
+  }
   return c.res({
     image: '/1.png',
     intents: [
+      <Button value="First">My Rank</Button>,
       <Button.Link
         href={ADD_URL}
       >
-        Add Global Rank
+        Add Action
       </Button.Link>,
     ],
   })
@@ -69,6 +141,19 @@ app.post('/rank-action', async (c) => {
         },
       } = cast;
 
+      const address = c.var.interactor?.verifiedAddresses.ethAddresses[0];
+      const following = c.var.interactor?.viewerContext?.following;
+      const userData = {
+        username: username || "",
+        fid: fid || 0,
+        address: address || "",
+        loads: 1,
+        following: following || false,
+        recasted: false,
+      };
+      const totalLoads = await incrementUserTotalLoads(fid || 0);
+      if (!totalLoads) addUser(userData);
+
       const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
         method: 'POST',
         headers: {
@@ -79,17 +164,17 @@ app.post('/rank-action', async (c) => {
       })
 
       if (!response.ok) {
-        return c.json({ message: 'Failed to call Openrank API' }, 400);
+        return c.json({ message: 'Failed to call Openrank API' });
       }
 
       const data = await response.json();
       console.log('data', data);
 
-      let message = `Rank# ${data.result[0].rank} & %ile: ${data.result[0].percentile}`;
+      let message = `Rank: ${data.result[0].rank}, Percentile: ${data.result[0].percentile}`;
       return c.json({ message });
     }
   } catch (e) {
-    return c.json({ message: "Error. Try Again." }, 500);
+    return c.json({ message: "Error. Try Again." });
   }
 });
 
