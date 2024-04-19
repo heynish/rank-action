@@ -7,7 +7,6 @@ interface UserData {
     loads: number;
     following: boolean;
     recasted: boolean;
-    type: string;
 }
 
 export async function addUser(userData: UserData) {
@@ -21,7 +20,6 @@ export async function addUser(userData: UserData) {
             loads: userData.loads,
             following: userData.following,
             recasted: userData.recasted,
-            type: userData.type,
         }]);
 
     if (error) {
@@ -32,13 +30,12 @@ export async function addUser(userData: UserData) {
     return true; // Return true to indicate the operation was successful
 }
 
-export async function incrementUserTotalLoads(fid: number, type: string) {
+export async function incrementUserTotalLoads(fid: number) {
 
     const { data, error } = await supabase
         .from('rank_action') // Replace with your actual table name
         .select('id, loads')
         .eq('fid', fid)
-        .eq('type', type)
         .single();
 
     if (error) {
@@ -65,4 +62,21 @@ export async function incrementUserTotalLoads(fid: number, type: string) {
         console.log("User not found for updating total loads");
         return false; // Return false to indicate the user was not found
     }
+}
+
+export async function checkRank(checked: string, checker: string) {
+
+    const { data, error } = await supabase
+        .from('rank_checker') // Replace with your actual table name
+        .insert([{
+            checked: checked,
+            checker: checker,
+        }]);
+
+    if (error) {
+        console.error("Supabase insertion error:", error);
+        return false; // Return false to indicate the operation failed
+    }
+
+    return true; // Return true to indicate the operation was successful
 }

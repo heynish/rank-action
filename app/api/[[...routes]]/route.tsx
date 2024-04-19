@@ -7,7 +7,7 @@ import { neynar } from "frog/middlewares";
 import { handle } from 'frog/next'
 import { serveStatic } from 'frog/serve-static';
 import { CastParamType, NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { addUser, incrementUserTotalLoads } from '../../core/addUser'
+import { addUser, incrementUserTotalLoads, checkRank } from '../../core/addUser'
 
 
 const neynarClient = new NeynarAPIClient(`${process.env.NEYNAR_API_KEY}`);
@@ -41,9 +41,8 @@ app.frame('/', async (c) => {
         loads: 1,
         following: following || false,
         recasted: false,
-        type: "install"
       };
-      const totalLoads = await incrementUserTotalLoads(frameData?.fid || 0, "install");
+      const totalLoads = await incrementUserTotalLoads(frameData?.fid || 0);
       if (!totalLoads) addUser(userData);
 
       const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
@@ -130,19 +129,22 @@ app.post('/rank-action', async (c) => {
         },
       } = cast;
 
+      const reqfid = c.var.interactor?.fid;
+      const reqname = c.var.interactor?.username;
       const address = c.var.interactor?.verifiedAddresses.ethAddresses[0];
       const following = c.var.interactor?.viewerContext?.following;
       const userData = {
-        username: username || "",
-        fid: fid || 0,
+        username: reqname || "",
+        fid: reqfid || 0,
         address: address || "",
         loads: 1,
         following: following || false,
         recasted: false,
-        type: "check"
       };
-      const totalLoads = await incrementUserTotalLoads(fid || 0, "check");
+      const totalLoads = await incrementUserTotalLoads(reqfid || 0);
       if (!totalLoads) addUser(userData);
+
+      checkRank(username, reqname || "");
 
       const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
         method: 'POST',
