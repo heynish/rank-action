@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
                 backgroundColor: "black",
                 padding: 50,
                 lineHeight: 1.2,
-                color: "black",
+                color: "white",
                 backgroundImage: `url(${process.env.NEXT_PUBLIC_HOST}/bg.png)`,
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
                     justifyContent: "center",
                     alignItems: "center",
                     fontFamily: 'Atyp',
-                    fontSize: 32,
+                    fontSize: 64,
                 }}
             >
                 <span style={{ marginBottom: 4 }}>Rank: {rank}</span>
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
                     justifyContent: "center",
                     alignItems: "center",
                     fontFamily: 'Atyp',
-                    fontSize: 16,
+                    fontSize: 48,
                     marginTop: 16,
                 }}
             >

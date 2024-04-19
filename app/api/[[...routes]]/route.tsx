@@ -30,48 +30,54 @@ const app = new Frog({
 app.frame('/', async (c) => {
   const { buttonValue, verified, frameData } = c;
   if (buttonValue === "First") {
-    if (!verified) {
-      console.log("Is verified");
-      return c.res({
-        image: '/notverified.png',
-        intents: [
-          <Button value="First">My Rank</Button>,
-          <Button.Link
-            href={ADD_URL}
-          >
-            Add Action
-          </Button.Link>,
-        ],
-      });
-    }
-    const username = c.var.interactor?.username;
-    const address = c.var.interactor?.verifiedAddresses.ethAddresses[0];
-    const following = c.var.interactor?.viewerContext?.following;
-    const userData = {
-      username: username || "",
-      fid: frameData?.fid || 0,
-      address: address || "",
-      loads: 1,
-      following: following || false,
-      recasted: false,
-    };
-    const totalLoads = await incrementUserTotalLoads(frameData?.fid || 0);
-    if (!totalLoads) addUser(userData);
+    if (verified) {
 
-    const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify([username])
-    })
 
-    if (!response.ok) {
+      const username = c.var.interactor?.username;
+      const address = c.var.interactor?.verifiedAddresses.ethAddresses[0];
+      const following = c.var.interactor?.viewerContext?.following;
+      const userData = {
+        username: username || "",
+        fid: frameData?.fid || 0,
+        address: address || "",
+        loads: 1,
+        following: following || false,
+        recasted: false,
+      };
+      const totalLoads = await incrementUserTotalLoads(frameData?.fid || 0);
+      if (!totalLoads) addUser(userData);
+
+      const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([username])
+      })
+
+      if (!response.ok) {
+        return c.res({
+          image: '/tryagain.png',
+          intents: [
+            <Button value="First">My Rank</Button>,
+            <Button.Link
+              href={ADD_URL}
+            >
+              Add Action
+            </Button.Link>,
+          ],
+        })
+      }
+
+      const data = await response.json();
+      console.log('data', data);
+      const url = `${process.env.NEXT_PUBLIC_HOST}/api/rank?rank=${data.result[0].rank}&percentile=${data.result[0].percentile}`
+
       return c.res({
-        image: '/tryagain.png',
+        action: '/',
+        image: url,
         intents: [
-          <Button value="First">My Rank</Button>,
           <Button.Link
             href={ADD_URL}
           >
@@ -80,22 +86,6 @@ app.frame('/', async (c) => {
         ],
       })
     }
-
-    const data = await response.json();
-    console.log('data', data);
-    const url = `${process.env.NEXT_PUBLIC_HOST}/api/rank?rank=${data.result[0].rank}&percentile=${data.result[0].percentile}`
-
-    return c.res({
-      action: '/',
-      image: url,
-      intents: [
-        <Button.Link
-          href={ADD_URL}
-        >
-          Add Action
-        </Button.Link>,
-      ],
-    })
   }
   return c.res({
     image: '/1.png',
