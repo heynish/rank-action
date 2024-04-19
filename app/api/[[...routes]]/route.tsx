@@ -29,21 +29,21 @@ const app = new Frog({
 
 app.frame('/', async (c) => {
   const { buttonValue, verified, frameData } = c;
-  if (!verified) {
-    console.log("Is verified");
-    return c.res({
-      image: '/notverified.png',
-      intents: [
-        <Button value="First">My Rank</Button>,
-        <Button.Link
-          href={ADD_URL}
-        >
-          Add Action
-        </Button.Link>,
-      ],
-    });
-  }
   if (buttonValue === "First") {
+    if (!verified) {
+      console.log("Is verified");
+      return c.res({
+        image: '/notverified.png',
+        intents: [
+          <Button value="First">My Rank</Button>,
+          <Button.Link
+            href={ADD_URL}
+          >
+            Add Action
+          </Button.Link>,
+        ],
+      });
+    }
     const username = c.var.interactor?.username;
     const address = c.var.interactor?.verifiedAddresses.ethAddresses[0];
     const following = c.var.interactor?.viewerContext?.following;
