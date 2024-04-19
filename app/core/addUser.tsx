@@ -7,6 +7,7 @@ interface UserData {
     loads: number;
     following: boolean;
     recasted: boolean;
+    type: string;
 }
 
 export async function addUser(userData: UserData) {
@@ -20,6 +21,7 @@ export async function addUser(userData: UserData) {
             loads: userData.loads,
             following: userData.following,
             recasted: userData.recasted,
+            type: userData.type,
         }]);
 
     if (error) {
@@ -30,12 +32,13 @@ export async function addUser(userData: UserData) {
     return true; // Return true to indicate the operation was successful
 }
 
-export async function incrementUserTotalLoads(fid: number) {
+export async function incrementUserTotalLoads(fid: number, type: string) {
 
     const { data, error } = await supabase
         .from('rank_action') // Replace with your actual table name
         .select('id, loads')
         .eq('fid', fid)
+        .eq('type', type)
         .single();
 
     if (error) {

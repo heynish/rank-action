@@ -31,8 +31,6 @@ app.frame('/', async (c) => {
   const { buttonValue, verified, frameData } = c;
   if (buttonValue === "First") {
     if (verified) {
-
-
       const username = c.var.interactor?.username;
       const address = c.var.interactor?.verifiedAddresses.ethAddresses[0];
       const following = c.var.interactor?.viewerContext?.following;
@@ -43,8 +41,9 @@ app.frame('/', async (c) => {
         loads: 1,
         following: following || false,
         recasted: false,
+        type: "install"
       };
-      const totalLoads = await incrementUserTotalLoads(frameData?.fid || 0);
+      const totalLoads = await incrementUserTotalLoads(frameData?.fid || 0, "install");
       if (!totalLoads) addUser(userData);
 
       const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
@@ -140,8 +139,9 @@ app.post('/rank-action', async (c) => {
         loads: 1,
         following: following || false,
         recasted: false,
+        type: "check"
       };
-      const totalLoads = await incrementUserTotalLoads(fid || 0);
+      const totalLoads = await incrementUserTotalLoads(fid || 0, "check");
       if (!totalLoads) addUser(userData);
 
       const response = await fetch('https://graph.cast.k3l.io/scores/global/following/handles', {
