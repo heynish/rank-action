@@ -7,7 +7,7 @@ import React from 'react'
 
 export async function generateMetadata(): Promise<Metadata> {
   const frameTags = await getFrameMetadata(
-    `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api`,
+    `${process.env.NEXT_PUBLIC_HOST || 'http://localhost:3000'}/api`,
   )
   return {
     other: frameTags,
